@@ -13,22 +13,29 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from urllib.parse import quote, unquote
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include,register_converter
 from django.conf.urls import url, include
 from keco.api import views as api_views
-from rest_framework import routers
+from rest_framework.authtoken import views
 
-router = routers.DefaultRouter()
-router.register(r'users', api_views.UserViewSet)
-router.register(r'groups', api_views.GroupViewSet)
+
+# class QuoteConverter:
+#     regex = "[\w%~_.-]+"
+#
+#     def to_python(self, value):
+#         return unquote(value)
+#
+#     def to_url(self, value):
+#         return quote(value, safe="")
+#
+#
+# register_converter(QuoteConverter, "quoted")
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    # path("", include("keco.accounts.urls")),
-    path("", include("keco.api.urls")),
-    path("", include("keco.dudu.urls")),
-    path("", include(router.urls)),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
-
+    url(r'^api-token-auth/', views.obtain_auth_token),
+    path('api/v1/user/token', api_views.UserTokenView.as_view(), name='keco-api-auth'),
+    path('api/v1/users/list', api_views.ListUsers.as_view(), name='keco-api-userslist'), #基于类写
+    path('api/v1/users/list1', api_views.users_list, name='keco-api-userslist'), #基于函数
 ]
